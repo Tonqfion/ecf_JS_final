@@ -21,4 +21,4 @@ Je pense que c'est tout sauf performant, mais malheureusement, c'est ce que j'ai
 ## Le mot de la fin
 
 Un truc sur, c'est que c'était un projet cool. On se rend compte quand on fait quelque chose comme ça qu'on a jamais vraiment fini, on veut toujours rajouter des trucs par ci par là. Mais il faut savoir s'arrêter, et donc j'en resterai à cet état (le 28 juin 2021, à 19h02), sauf si je trouve un bug de mort qui casse tout.
-Pour tester l'appli directement en ligne, c'est par là : https://ecfjs.bouland.o2switch.cefim.site. Normalement, cloner le repo puis faire un `npm install` fonctionne sans soucis.
+Pour tester l'appli directement en ligne, c'est par là : https://ecfjs.bouland.o2switch.cefim.site/ (ou https://bouland.o2switch.cefim.site/ecfjs/ si le premier lien ne marche pas). Normalement, cloner le repo puis faire un `npm install` fonctionne sans soucis.
