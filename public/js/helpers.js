@@ -22,7 +22,15 @@ export const GET_JSON = async function (url) {
     ]);
     const data = await res.json();
 
-    if (!res.ok) throw new Error(`${data.message} (${res.status})`);
+    // Petite condition au cas-où la réponse ne soit pas ok (requête vide, ou tentative de passage de HTML si il n'y a pas de filtre)
+    if (!res.ok) {
+      CONSTANTS.RESULT_COUNT_MESSAGE.classList.add("hidden");
+      CONSTANTS.NEW_SEARCH.classList.add("hidden");
+      CONSTANTS.HEADER.classList.remove("pt-16");
+      CONSTANTS.RESULT_MESSAGE.innerHTML = "";
+      CONSTANTS.RESULT_MESSAGE.innerHTML = `<p class="font-bold italic text-center text-blue-800">Your request was not understood by the app (maybe it was empty or you tried something you shouldn't, you naughty boy / girl...). Have another go!</p>`;
+      throw new Error(`${data.message} (${res.status})`);
+    }
     return data;
   } catch (err) {
     throw err;

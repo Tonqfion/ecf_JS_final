@@ -54,20 +54,10 @@ const loadSearchResults = async function (parent, start, maxResults) {
   // Je supprime l'eventlistener au scroll, pour éviter de le lancer une seconde fois avant que les résultats aient chargés
   document.removeEventListener("scroll", scrollLoad);
   try {
-    // D'abord je vérifie que l'utilisateur a bien tapé quelque chose dans le champs de recherche, sinon, j'ôte l'affichage du bouton "New Search", ainsi que l'affichage du nombre de résultats (s'il a déjà effectué une recherche avant)
-    if (!currentSearch) {
-      CONSTANTS.RESULT_COUNT_MESSAGE.classList.add("hidden");
-      CONSTANTS.NEW_SEARCH.classList.add("hidden");
-      CONSTANTS.HEADER.classList.remove("pt-16");
-      CONSTANTS.RESULT_MESSAGE.innerHTML = "";
-      CONSTANTS.RESULT_MESSAGE.innerHTML = `<p class="font-bold italic text-center text-blue-800">I think you forgot to type something in the search field... Try again!</p>`;
-      return;
-    }
-
-    //
     CONSTANTS.NEW_SEARCH.classList.remove("hidden");
     CONSTANTS.HEADER.classList.add("pt-16");
-    // Sinon, je vide le cotenu du message indiquant les informations sur la recherche, et en attendant que ces derniers s'affichent, je fais apparaître un spinner
+
+    // Sinon, je vide le contenu du message indiquant les informations sur la recherche, et en attendant que ces derniers s'affichent, je fais apparaître un spinner
     CONSTANTS.RESULT_MESSAGE.innerHTML = "";
     CONSTANTS.RESULT_MESSAGE.innerHTML = `<svg
       class="animate-spin ml-1 mr-3 h-5 w-5 text-blue-800"
