@@ -46,7 +46,7 @@ function startSearchHandler() {
   CONSTANTS.PARENT_ELEMENT.innerHTML = "";
   currentSearch = CONSTANTS.SEARCH_FIELD.value;
 
-  if (!currentSearch) {
+  if (currentSearch.trim().length === 0) {
     helpers.init(`Your request was empty. Please try again`);
     return;
   }
