@@ -1,7 +1,7 @@
 export const CONSTANTS = {
   API_URL: "https://musicbrainz.org/ws/2/",
   COVER_API_URL: "https://coverartarchive.org/release/",
-  TIMEOUT_SEC: 10,
+  TIMEOUT_SEC: 1,
   SEARCH_FIELD: document.getElementById("search-input"),
   SEARCH_BUTTON: document.getElementById("search-btn"),
   PARENT_ELEMENT: document.getElementById("results-grid"),

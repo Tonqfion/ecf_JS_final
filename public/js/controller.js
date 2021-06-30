@@ -2,7 +2,7 @@
 
 import { CONSTANTS } from "./config.js";
 import * as model from "./models/model.js";
-import * as HELPERS from "./helpers.js";
+import * as helpers from "./helpers.js";
 import TrackView from "./view/trackView.js";
 import CoverView from "./view/coverView.js";
 import ArtistView from "./view/artistView.js";
@@ -24,7 +24,7 @@ let searchFilterInput = CONSTANTS.SEARCH_FILTER.value;
 let constructedURL;
 
 /**J'utilise ma fonction d'initialisation au chargement du script "au cas où" */
-HELPERS.INIT();
+helpers.init("Start searching");
 
 /** J'enregistre la valeur du filtre dans une variable à chaque input */
 CONSTANTS.SEARCH_FILTER.addEventListener("input", function (ev) {
@@ -45,7 +45,13 @@ function startSearchHandler() {
   idNbr = 1;
   CONSTANTS.PARENT_ELEMENT.innerHTML = "";
   currentSearch = CONSTANTS.SEARCH_FIELD.value;
-  constructedURL = HELPERS.CONSTRUCT_URL_PART(searchFilterInput, currentSearch);
+
+  if (!currentSearch) {
+    helpers.init(`Your request was empty. Please try again`);
+    return;
+  }
+
+  constructedURL = helpers.construct_url_part(searchFilterInput, currentSearch);
   loadSearchResults(CONSTANTS.PARENT_ELEMENT, offSet, limit);
 }
 
@@ -80,8 +86,8 @@ const loadSearchResults = async function (parent, start, maxResults) {
       ></path>
     </svg>`;
 
-    // je lance ma fonction GET_JSON (cf helpers) qui prend une URL en paramètre et enregistre le résultat dans data
-    const data = await HELPERS.GET_JSON(
+    // je lance ma fonction get_json (cf helpers) qui prend une URL en paramètre et enregistre le résultat dans data
+    const data = await helpers.get_json(
       encodeURI(
         `${CONSTANTS.API_URL}recording/?query=${constructedURL}&fmt=json&limit=${maxResults}&offset=${start}`
       )
@@ -95,36 +101,35 @@ const loadSearchResults = async function (parent, start, maxResults) {
       We found ${totalResults} results for this search.
     </p>`;
 
-    // Je mappe les résultats dans un nouvel objet plus exploitable (pas bien pour la mémoire !) qui enregistrera des valeurs pour différentes clefs selon la nature des résultats. J'en profite aussi pour raccourcis les noms des artistes, titres ou nom d'albums trop longs pour simplifier l'affichage.
+    // Je mappe les résultats dans un nouvel objet plus exploitable (pas bien pour la mémoire !) qui enregistrera des valeurs pour différentes clefs selon la nature des résultats. J'en profite aussi pour raccourcir les noms des artistes, titres ou noms d'albums trop longs pour simplifier l'affichage.
     searchResults = data.recordings.map((rec) => {
       return {
         rank: idNbr++,
-        recordingID: HELPERS.ESCAPE_HTML(rec.id),
-        title: HELPERS.ESCAPE_HTML(HELPERS.SHORTEN_STRING(rec.title, 50)),
-
+        recordingID: helpers.escape_html(rec.id),
+        title: helpers.escape_html(helpers.shorten_string(rec.title, 50)),
         // Selon qu'il y ait un artiste ou plus, j'affiche au moins un artiste, sinon je concatène avec le nom du second (et désolé s'il y en a plus ...)
         artist:
           rec["artist-credit"].length === 1
-            ? HELPERS.ESCAPE_HTML(
-                HELPERS.SHORTEN_STRING(rec["artist-credit"][0].name, 50)
+            ? helpers.escape_html(
+                helpers.shorten_string(rec["artist-credit"][0].name, 50)
               )
-            : HELPERS.ESCAPE_HTML(
-                HELPERS.SHORTEN_STRING(rec["artist-credit"][0].name, 50)
+            : helpers.escape_html(
+                helpers.shorten_string(rec["artist-credit"][0].name, 50)
               ) +
               '<span class="italic"> & </span>' +
-              HELPERS.ESCAPE_HTML(
-                HELPERS.SHORTEN_STRING(rec["artist-credit"][1].name, 50)
+              helpers.escape_html(
+                helpers.shorten_string(rec["artist-credit"][1].name, 50)
               ),
-        artistID: HELPERS.ESCAPE_HTML(rec["artist-credit"][0].artist.id),
+        artistID: helpers.escape_html(rec["artist-credit"][0].artist.id),
 
         // Parfois, un titre n'a pas de releases, dans ce cas, j'affiche un texte différent !
         mainRelease: rec.hasOwnProperty("releases")
-          ? HELPERS.ESCAPE_HTML(
-              HELPERS.SHORTEN_STRING(rec.releases[0].title, 80)
+          ? helpers.escape_html(
+              helpers.shorten_string(rec.releases[0].title, 80)
             )
           : '<span class="font-bold italic text-red-800">No information on releases</span>',
         mainRelaseID: rec.hasOwnProperty("releases")
-          ? HELPERS.ESCAPE_HTML(rec["releases"][0].id)
+          ? helpers.escape_html(rec["releases"][0].id)
           : "",
       };
     });
@@ -227,7 +232,7 @@ function createEventListener(itemType, controlFunction) {
 
 // Ma fonction qui charge les résultats au scroll. Je l'ai pompé sur le net :D Mais en gros, elle enregistre la hauteur du document, puis compare à la position du scroll, et se déclenche quand les deux sont égales. S'il n'y a plus de résultats à afficher (que l'offset de la future fonction loadSearchResults dépasse le nombre de résultats total), alors j'affiche un message, sinon, on relance la fonction loadsearchresults.
 function scrollLoad() {
-  if (HELPERS.GETDOCHEIGHT() == HELPERS.GETSCROLLXY()[1] + window.innerHeight) {
+  if (helpers.GETDOCHEIGHT() == helpers.GETSCROLLXY()[1] + window.innerHeight) {
     if (offSet >= totalResults) {
       CONSTANTS.RESULT_MESSAGE.innerHTML = `
         <p class="font-bold italic text-center text-blue-800">No more results to show!</p>
@@ -320,7 +325,7 @@ initHandler();
 // Et pour finir, quelques eventslisteners User Friendly
 // L'eventlistener attaché au bouton newsearch, qui lance la fonction INIT() (cf helpers) réinitialisant l'état original de la page et qui supprime l'eventlistener "onscroll" (car ça fait bugger si on le laisse...)
 CONSTANTS.NEW_SEARCH.addEventListener("click", () => {
-  HELPERS.INIT();
+  helpers.init("Start your new search");
   document.removeEventListener("scroll", scrollLoad);
 });
 

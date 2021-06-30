@@ -1,10 +1,10 @@
 // Regarder controller.js en premier !
 // J'importe ce dont j'ai besoin
 import { CONSTANTS } from "../config.js";
-import { CONVERT_MILLIS_TO_MINS_SECONDS } from "../helpers.js";
-import { GET_JSON } from "../helpers.js";
-import { REMOVE_DUPLICATES } from "../helpers.js";
-import { ESCAPE_HTML } from "../helpers.js";
+import { convert_millis_to_mins_seconds } from "../helpers.js";
+import { get_json } from "../helpers.js";
+import { remove_duplicates } from "../helpers.js";
+import { escape_html } from "../helpers.js";
 import CoverView from "../view/coverView.js";
 
 // J'initialise le state
@@ -20,7 +20,7 @@ export const state = {
 // Je crée ma fonction qui charge les données si l'on clique sur la note (plus de détails sur la piste)
 export const loadTrackDetail = async function (id) {
   try {
-    const trackData = await GET_JSON(
+    const trackData = await get_json(
       encodeURI(
         `${CONSTANTS.API_URL}recording/${id}?inc=genres+artists+ratings+releases&fmt=json`
       )
@@ -33,23 +33,23 @@ export const loadTrackDetail = async function (id) {
     // Je récupère les données dont j'ai besoin à partir de l'objet trackData pour me simplifier la tâche et je prépare déjà les cas d'erreurs pour mes views (données manquantes ou autre) à l'aide de ternaires sur les propriétés ainsi que de l'opérateur de coalescence des nuls.
     state.trackDetails = {
       trackTitle:
-        ESCAPE_HTML(trackData.title) ??
+        escape_html(trackData.title) ??
         `<span class="italic text-red-800">No title provided</span>`,
-      trackID: ESCAPE_HTML(trackData.id),
+      trackID: escape_html(trackData.id),
       trackReleaseDate: trackData["first-release-date"]
-        ? ESCAPE_HTML(trackData["first-release-date"])
+        ? escape_html(trackData["first-release-date"])
         : `<span class="italic text-red-800">No date provided</span>`,
 
       // J'utilise ma fonction de conversion en milisecondes sur la durée de la track si elle est renseignée
       trackLength:
         trackData.length && typeof trackData.length === "number"
-          ? CONVERT_MILLIS_TO_MINS_SECONDS(trackData.length)
+          ? convert_millis_to_mins_seconds(trackData.length)
           : `<span class="italic text-red-800">No duration provided</span>`,
 
       // Je prépare le markup de ma trackView en faisant un map / join des noms des artistes
       trackArtists: trackData["artist-credit"].length
         ? trackData["artist-credit"]
-            .map((artist) => ESCAPE_HTML(artist.name))
+            .map((artist) => escape_html(artist.name))
             .join(" / ")
         : `<span class="italic text-red-800">No information on artist</span>`,
 
@@ -58,20 +58,20 @@ export const loadTrackDetail = async function (id) {
       // 2 - je supprime les doublons (cf helpers) pour pas que plusieurs releases ayant le même nom apparaissent (je sais, c'est pas ce qu'il y a dans la démo, mais je trouvais ça plus propre)
       // 3 - je join le tout
       trackReleasesDisplay: trackData["releases"].length
-        ? REMOVE_DUPLICATES(
-            trackData["releases"].map((release) => ESCAPE_HTML(release.title))
+        ? remove_duplicates(
+            trackData["releases"].map((release) => escape_html(release.title))
           ).join(" / ")
         : `<span class="italic text-red-800">No information on releases</span>`,
 
       // Comme je supprime des doublons et que je transforme ça en string sur la propriété précédente, je crée un tableau qui conserve les ID des releases, pour préparer les requêtes pour les cover
       trackReleasesIdArray: trackData["releases"].length
-        ? trackData["releases"].map((release) => ESCAPE_HTML(release.id))
+        ? trackData["releases"].map((release) => escape_html(release.id))
         : "no-release",
 
       // Même principe que pour les releases, mais sur les genres
       trackGenres: trackData["genres"].length
-        ? REMOVE_DUPLICATES(
-            trackData["genres"].map((genre) => ESCAPE_HTML(genre.name))
+        ? remove_duplicates(
+            trackData["genres"].map((genre) => escape_html(genre.name))
           ).join(" / ")
         : `<span class="italic text-red-800">No information on genres</span>`,
 
@@ -118,8 +118,8 @@ export const loadTrackDetail = async function (id) {
           validResults.forEach((release) => {
             release.images.forEach((image) => {
               state.renderCoverArray.push({
-                thumbnailUrl: ESCAPE_HTML(image.thumbnails.small),
-                originalUrl: ESCAPE_HTML(image.image),
+                thumbnailUrl: escape_html(image.thumbnails.small),
+                originalUrl: escape_html(image.image),
               });
             });
           });
@@ -144,25 +144,25 @@ export const loadTrackDetail = async function (id) {
 // Comme pour trackDetails, je crée une propriété artistDetails qui sera stockée dans l'état, pour afficher les détails de l'artiste principal à partir de son id
 export const loadArtistDetail = async function (id) {
   try {
-    const artistData = await GET_JSON(
+    const artistData = await get_json(
       encodeURI(`${CONSTANTS.API_URL}artist/${id}?inc=releases&fmt=json`)
     );
     state.artistDetails = {
       artistName:
-        ESCAPE_HTML(artistData.name) ??
+        escape_html(artistData.name) ??
         '<span class="italic text-red-800">No Name found',
       artistType:
-        ESCAPE_HTML(artistData.type) ??
+        escape_html(artistData.type) ??
         '<span class="italic text-red-800">No type found for this artist</span>',
-      artistID: ESCAPE_HTML(artistData.id),
+      artistID: escape_html(artistData.id),
       artistStartDate: artistData["life-span"].begin
-        ? ESCAPE_HTML(artistData["life-span"].begin)
+        ? escape_html(artistData["life-span"].begin)
         : '<span class="italic text-red-800">No beginning date provided</span>',
       artistEndDate: artistData["life-span"].end
-        ? ESCAPE_HTML(artistData["life-span"].end)
+        ? escape_html(artistData["life-span"].end)
         : '<span class="italic text-red-800">No ending date provided</span>',
       artistArea: artistData.area
-        ? ESCAPE_HTML(artistData.area.name)
+        ? escape_html(artistData.area.name)
         : '<span class="italic text-red-800">No info on area</span>',
     };
   } catch (err) {
@@ -174,7 +174,7 @@ export const loadArtistDetail = async function (id) {
 // Idem, mais pour les détails de la release principale
 export const loadReleaseDetail = async function (id) {
   try {
-    const releaseData = await GET_JSON(
+    const releaseData = await get_json(
       encodeURI(
         `${CONSTANTS.API_URL}release/${id}?inc=artists+labels+recordings&fmt=json`
       )
@@ -184,16 +184,16 @@ export const loadReleaseDetail = async function (id) {
 
     state.releaseDetails = {
       releaseTitle: releaseData.title
-        ? ESCAPE_HTML(releaseData.title)
+        ? escape_html(releaseData.title)
         : '<span class="italic text-red-800">No title found</span>',
       releaseDate: releaseData.date
-        ? ESCAPE_HTML(releaseData.date)
+        ? escape_html(releaseData.date)
         : '<span class="italic text-red-800">No date provided</span>',
-      releaseID: ESCAPE_HTML(releaseData.id),
+      releaseID: escape_html(releaseData.id),
       hasCover: releaseData["cover-art-archive"].count > 0 ? true : false,
       releaseArtists: releaseData["artist-credit"].length
         ? releaseData["artist-credit"]
-            .map((artist) => ESCAPE_HTML(artist.name))
+            .map((artist) => escape_html(artist.name))
             .join(" / ")
         : `<span class="italic text-red-800">No information on artist</span>`,
 
@@ -202,9 +202,9 @@ export const loadReleaseDetail = async function (id) {
         ? releaseData.media[0].tracks
             .map(
               (track) =>
-                ESCAPE_HTML(track.position.toString()) +
+                escape_html(track.position.toString()) +
                 ". " +
-                ESCAPE_HTML(track.recording.title)
+                escape_html(track.recording.title)
             )
             .join("<br>")
         : `<span class="italic text-red-800">No tracklist provided</span>`,
@@ -219,8 +219,8 @@ export const loadReleaseDetail = async function (id) {
         .then((result) => {
           result.images.forEach(function (image) {
             state.renderCoverArray.push({
-              thumbnailUrl: ESCAPE_HTML(image.thumbnails.small),
-              originalUrl: ESCAPE_HTML(image.image),
+              thumbnailUrl: escape_html(image.thumbnails.small),
+              originalUrl: escape_html(image.image),
             });
             CoverView.renderCovers(state.renderCoverArray);
           });

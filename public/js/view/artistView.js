@@ -19,7 +19,7 @@ class ArtistView extends View {
   <p class="border-b-2 pb-2">
   ${this.data.artistArea}
   </p>
-    </div>`;
+  </div>`;
   }
 }
 

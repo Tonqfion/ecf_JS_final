@@ -13,8 +13,8 @@ const timeout = function (s) {
   });
 };
 
-// ma fonction de récupération des données depuis l'API, qui est une course entre la fonction timeout, et la résolution du fetch d'une URL. Si le fetch des données "gagne", le résultat de la promesse est parser à son tour et
-export const GET_JSON = async function (url) {
+// ma fonction de récupération des données depuis l'API, qui est une course entre la fonction timeout, et la résolution du fetch d'une URL. Si le fetch des données "gagne", le résultat de la promesse est parser à son tour, sinon,
+export const get_json = async function (url) {
   try {
     const res = await Promise.race([
       fetch(url),
@@ -22,23 +22,19 @@ export const GET_JSON = async function (url) {
     ]);
     const data = await res.json();
 
-    // Petite condition au cas-où la réponse ne soit pas ok (requête vide, ou tentative de passage de HTML si il n'y a pas de filtre)
+    // Petite condition au cas-où la réponse ne soit pas comprise
     if (!res.ok) {
-      CONSTANTS.RESULT_COUNT_MESSAGE.classList.add("hidden");
-      CONSTANTS.NEW_SEARCH.classList.add("hidden");
-      CONSTANTS.HEADER.classList.remove("pt-16");
-      CONSTANTS.RESULT_MESSAGE.innerHTML = "";
-      CONSTANTS.RESULT_MESSAGE.innerHTML = `<p class="font-bold italic text-center text-blue-800">Your request was not understood by the app (maybe it was empty or you tried something you shouldn't, you naughty boy / girl...). Have another go!</p>`;
+      init("Woops. Something went wrong! Did you try something naughty?");
       throw new Error(`${data.message} (${res.status})`);
     }
     return data;
   } catch (err) {
-    throw err;
+    throw new Error("And ... we got some issues captain" + err);
   }
 };
 
 // Une petite fonction pour raccourcir une chaîne de caractère
-export function SHORTEN_STRING(string, maxLength) {
+export function shorten_string(string, maxLength) {
   if (string.length > maxLength) {
     return `${string.substring(0, maxLength - 3)}...`;
   } else {
@@ -46,9 +42,8 @@ export function SHORTEN_STRING(string, maxLength) {
   }
 }
 
-// Fonction pour construire une partie de l'URL de la requête de recherche. Pour le filtre "Everything", j'ai choisi de chercher tous les termes en vrac
-export function CONSTRUCT_URL_PART(searchType, query) {
-  query = ESCAPE_HTML(query);
+// Fonction pour construire une partie de l'URL de la requête de recherche selon le filtre choisi. Pour le filtre "Everything", j'ai choisi de chercher tous les termes en vrac
+export function construct_url_part(searchType, query) {
   if (searchType === "artist-opt") {
     return `artist:"${query}" OR artistname:"${query}"`;
   } else if (searchType === "track-opt") {
@@ -70,14 +65,14 @@ export function CONSTRUCT_URL_PART(searchType, query) {
 }
 
 // Fonction de conversion des millisecondes en minutes / secondes (pour la durée de la piste)
-export function CONVERT_MILLIS_TO_MINS_SECONDS(tracklength) {
+export function convert_millis_to_mins_seconds(tracklength) {
   let minutes = Math.floor(tracklength / 60000);
   let seconds = ((tracklength % 60000) / 1000).toFixed(0);
   return minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
 }
 
 // Fonction d'initiation de l'appli (quand on charge l'appli ou que l'on fait une nouvelle recherche)
-export function INIT() {
+export function init(message) {
   CONSTANTS.SEARCH_FIELD.focus();
   CONSTANTS.MODAL_WINDOW.classList.add("hidden");
   CONSTANTS.PARENT_ELEMENT.innerHTML = "";
@@ -85,13 +80,13 @@ export function INIT() {
   CONSTANTS.NEW_SEARCH.classList.add("hidden");
   CONSTANTS.RESULT_COUNT_MESSAGE.classList.add("hidden");
   CONSTANTS.RESULT_MESSAGE.innerHTML = `
-  <p class="font-bold italic text-center text-blue-800">Start searching...</p>
+  <p class="font-bold italic text-center text-blue-800">${message}</p>
 `;
   CONSTANTS.HEADER.classList.remove("pt-16");
 }
 
 // Fonction qui supprime les doublons d'un tableau. Je l'ai choppé sur le net !
-export function REMOVE_DUPLICATES(array) {
+export function remove_duplicates(array) {
   var prims = { boolean: {}, number: {}, string: {} },
     objs = [];
 
@@ -147,7 +142,7 @@ export function GETDOCHEIGHT() {
 }
 
 // Comme j'utilise beaucoup de innerHTML et de insertAdjacentHTML (parce que c'est quand même vachement plus simple avec Tailwind ...), je m'assure de traiter les chaînes de caractères qui sont envoyées dans les requêtes par l'utilisateur, mais aussi de traiter les chaînes de caractères qui reviennent de MusicBrainz. C'est pas très propre et sans doute pas ultra performant, mais quand tu (Antho) m'a dit qu'il fallait aussi penser au fait qu'un super-hacker pourrait prendre la main sur ce qui était envoyé via l'API, c'était trop tard pour refaire tout mon code (ou en tout cas, ça m'aurait pris énormément de temps de refaire le tout et passer à des ajouts d'element / de classnames), j'ai donc choisi cette solution là ...
-export function ESCAPE_HTML(string) {
+export function escape_html(string) {
   let map = {
     "&": "&amp;",
     "<": "&lt;",

@@ -1,4 +1,4 @@
-import { SHORTEN_STRING } from "../helpers.js";
+import { shorten_string } from "../helpers.js";
 import View from "./view.js";
 
 // Gestion de génération des markups pour l'affichage des bookmarks.
@@ -18,7 +18,7 @@ class BookmarkView extends View {
 
   generateUniqueMarkup(track) {
     return `<li class="p-2 flex justify-between bg-red-400">    
-    <p>${SHORTEN_STRING(track.trackArtists, 40)} - ${SHORTEN_STRING(
+    <p>${shorten_string(track.trackArtists, 40)} - ${shorten_string(
       track.trackTitle,
       40
     )}  </p>
